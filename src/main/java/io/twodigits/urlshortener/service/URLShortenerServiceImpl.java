@@ -63,6 +63,11 @@ public class URLShortenerServiceImpl implements URLShortenerService {
     }
 
     @Override
+    public Optional<URL> getEncodedUrl(String url) {
+        return urlRepo.findByShortUrl(url);
+    }
+
+    @Override
     public Optional<URL> getURLOfUserById(String user, String id) {
         Optional<URL> url = urlRepo.findById(id)
                 .filter(u -> u.getUsername().equals(user));

@@ -4,13 +4,16 @@ import io.twodigits.urlshortener.model.URL;
 import io.twodigits.urlshortener.model.URLDto;
 import io.twodigits.urlshortener.service.URLShortenerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping
 public class URLController {
 
     private final URLShortenerService urlShortenerService;
@@ -19,7 +22,7 @@ public class URLController {
     public URLController(URLShortenerService urlShortenerService) {this.urlShortenerService = urlShortenerService;}
 
 
-    @GetMapping("url/{shortUrl}")
+    @GetMapping("/url/{shortUrl}")
     public Optional<URL> getLongUrlByShortUrl(@PathVariable String shortUrl) {
         return urlShortenerService.getLongUrlByShortUrl(shortUrl);
     }
@@ -34,9 +37,21 @@ public class URLController {
         return urlShortenerService.getURLById(id);
     }
 
-    @GetMapping("url/{user}/{id}")
+    @GetMapping("/url/{user}/{id}")
     public Optional<URL> getUrlOfUserById(@PathVariable String user, @PathVariable String id) {
         return urlShortenerService.getURLOfUserById(user, id);
+    }
+
+    @GetMapping("/{shortUrl}")
+    public ResponseEntity<?> urlRedirect(@PathVariable String shortUrl) {
+        Optional<URL> urlToRedirect = urlShortenerService.getEncodedUrl(shortUrl);
+        if (urlToRedirect.isPresent()) {
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Location", urlToRedirect.get().getLongUrl());
+            return new ResponseEntity<>(headers, HttpStatus.FOUND);
+        } else {
+            return new ResponseEntity<>("URL not found", HttpStatus.NOT_FOUND);
+        }
     }
 
     @PostMapping("/generate")

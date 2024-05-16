@@ -28,6 +28,8 @@ public interface URLShortenerService {
 
     URL saveShortUrl(URL url);
 
+    Optional<URL> getEncodedUrl(String url);
+
 
     /**
      * Get a specific URL of a user by its ID.
