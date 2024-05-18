@@ -16,7 +16,7 @@ public class URLStats {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "url_id", nullable = false)
+    @JoinColumn(name = "short_url", nullable = false)
     private URL url;
 
     private LocalDateTime accessTime;
