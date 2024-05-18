@@ -24,7 +24,6 @@ public class URLController {
     @Autowired
     public URLController(URLShortenerService urlShortenerService) {this.urlShortenerService = urlShortenerService;}
 
-
     @GetMapping("/url/{shortUrl}")
     public Optional<URL> getLongUrlByShortUrl(@PathVariable String shortUrl) {
         return urlShortenerService.getLongUrlByShortUrl(shortUrl);
@@ -78,7 +77,6 @@ public class URLController {
     @DeleteMapping("/delete/{id}")
     public void deleteUrlById(@PathVariable String id) {
         urlShortenerService.deleteUrlById(id);
-
     }
 
     @DeleteMapping("/delete/{user}/{id}")
