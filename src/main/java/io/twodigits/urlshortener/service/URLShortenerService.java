@@ -2,6 +2,7 @@ package io.twodigits.urlshortener.service;
 
 import io.twodigits.urlshortener.model.URL;
 import io.twodigits.urlshortener.model.URLDto;
+import io.twodigits.urlshortener.model.URLStats;
 
 import java.util.List;
 import java.util.Optional;
@@ -55,5 +56,11 @@ public interface URLShortenerService {
     void deleteUrlOfUserById(String user, String id);
 
     void deleteUrlById(String id);
+
+    URLStats saveURLAccessStatistic(URLStats stats);
+
+    List<URLStats> getURLAccessStatistics(URL url);
+
+    List<URLStats> getURLAccessStatisticsByShortUrl(String shortUrl);
 
 }

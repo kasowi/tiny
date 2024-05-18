@@ -2,13 +2,16 @@ package io.twodigits.urlshortener.controller;
 
 import io.twodigits.urlshortener.model.URL;
 import io.twodigits.urlshortener.model.URLDto;
+import io.twodigits.urlshortener.model.URLStats;
 import io.twodigits.urlshortener.service.URLShortenerService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,15 +46,28 @@ public class URLController {
     }
 
     @GetMapping("/{shortUrl}")
-    public ResponseEntity<?> urlRedirect(@PathVariable String shortUrl) {
+    public ResponseEntity<?> urlRedirect(@PathVariable String shortUrl, HttpServletRequest request) {
         Optional<URL> urlToRedirect = urlShortenerService.getEncodedUrl(shortUrl);
         if (urlToRedirect.isPresent()) {
+            URLStats statistics = new URLStats();
+            statistics.setUrl(urlToRedirect.get());
+            statistics.setAccessTime(LocalDateTime.now());
+            statistics.setUserAgent(request.getHeader("User-Agent"));
+            statistics.setReferrer(request.getHeader("Referrer"));
+            statistics.setClientIp(request.getRemoteAddr());
+            urlShortenerService.saveURLAccessStatistic(statistics);
+
             HttpHeaders headers = new HttpHeaders();
             headers.add("Location", urlToRedirect.get().getLongUrl());
             return new ResponseEntity<>(headers, HttpStatus.FOUND);
         } else {
             return new ResponseEntity<>("URL not found", HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/stats/{shortUrl}")
+    public List<URLStats> getUrlStatistics(@PathVariable String shortUrl) {
+        return urlShortenerService.getURLAccessStatisticsByShortUrl(shortUrl);
     }
 
     @PostMapping("/generate")

@@ -3,12 +3,15 @@ package io.twodigits.urlshortener.service;
 import com.google.common.hash.Hashing;
 import io.twodigits.urlshortener.model.URL;
 import io.twodigits.urlshortener.model.URLDto;
+import io.twodigits.urlshortener.model.URLStats;
 import io.twodigits.urlshortener.repo.URLRepo;
+import io.twodigits.urlshortener.repo.URLStatsRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,8 +20,13 @@ public class URLShortenerServiceImpl implements URLShortenerService {
 
     private final URLRepo urlRepo;
 
+    private final URLStatsRepo urlStatsRepo;
+
     @Autowired
-    public URLShortenerServiceImpl(URLRepo urlRepo) {this.urlRepo = urlRepo;}
+    public URLShortenerServiceImpl(URLRepo urlRepo, URLStatsRepo urlStatsRepo) {
+        this.urlRepo = urlRepo;
+        this.urlStatsRepo = urlStatsRepo;
+    }
 
     @Override
     public List<URL> listURLsOfUser (String username) {
@@ -96,5 +104,21 @@ public class URLShortenerServiceImpl implements URLShortenerService {
     @Override
     public void deleteUrlById(String id) {
         urlRepo.deleteById(id);
+    }
+
+    @Override
+    public URLStats saveURLAccessStatistic(URLStats stats) {
+        return urlStatsRepo.save(stats);
+    }
+
+    @Override
+    public List<URLStats> getURLAccessStatistics(URL url) {
+        return urlStatsRepo.findByUrl(url);
+    }
+
+    @Override
+    public List<URLStats> getURLAccessStatisticsByShortUrl(String shortUrl) {
+        Optional<URL> urlOpt = urlRepo.findByShortUrl(shortUrl);
+        return urlOpt.map(this::getURLAccessStatistics).orElseGet(Collections::emptyList);
     }
 }
